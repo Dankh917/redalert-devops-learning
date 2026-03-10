@@ -12,10 +12,12 @@ The project currently includes a Python backend built with FastAPI and MongoDB. 
 - FastAPI
 - MongoDB
 - Uvicorn
+- Vanilla JavaScript
+- Leaflet
 
 ## Run Locally
 
-### 1. Install dependencies
+### 1. Install backend dependencies
 
 ```bash
 cd backend
@@ -54,10 +56,31 @@ python -m uvicorn app.main:app --reload
 
 Then open `http://127.0.0.1:8000/docs`.
 
+### 5. Run the frontend
+
+```bash
+cd frontend
+python -m http.server 4173
+```
+
+Then open `http://127.0.0.1:4173`.
+
 ## API Endpoints
 
 - `GET /api/alerts/today` returns how many alert records happened today in `Asia/Jerusalem` time.
 - `GET /api/alerts/map` returns city markers with cumulative alert counts, coordinates, and last alert time.
+
+## Frontend
+
+The `frontend/` folder contains a static map-first dashboard for exploring the backend API.
+
+It includes:
+
+- a configurable backend URL field
+- interactive Leaflet map markers sized by total alerts
+- city spotlight and hotspot list interactions
+- today's alert summary cards and kind breakdown
+- unmapped area visibility for coverage gaps
 
 ## Notes
 

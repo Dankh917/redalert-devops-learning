@@ -40,6 +40,24 @@ class AlertsRepository:
             )
         )
 
+    def get_breakdown_since_date(self, from_date: str) -> list[dict[str, Any]]:
+        return list(
+            self._alerts.aggregate(
+                [
+                    {"$match": {"jerusalem_date": {"$gte": from_date}}},
+                    {
+                        "$group": {
+                            "_id": "$kind",
+                            "alert_count": {"$sum": 1},
+                            "area_hit_count": {"$sum": "$areas_count"},
+                            "latest_timestamp": {"$max": "$timestamp"},
+                        }
+                    },
+                    {"$sort": {"_id": 1}},
+                ]
+            )
+        )
+
     def get_city_map_rows(self, min_alerts: int) -> list[dict[str, Any]]:
         return list(
             self._alerts.aggregate(
@@ -73,44 +91,55 @@ class AlertsRepository:
             )
         )
 
-    def count_mapped_area_hits(self) -> int:
-        rows = list(
-            self._alerts.aggregate(
-                [
-                    {"$unwind": "$areas"},
-                    {
-                        "$lookup": {
-                            "from": self._settings.cities_collection,
-                            "localField": "areas",
-                            "foreignField": "value",
-                            "as": "city",
-                        }
-                    },
-                    {"$set": {"city": {"$first": "$city"}}},
-                    {"$match": {"city": {"$ne": None}}},
-                    {"$count": "mapped_area_hits"},
-                ]
-            )
-        )
-        return int(rows[0]["mapped_area_hits"]) if rows else 0
+    def get_map_snapshot(self, min_alerts: int, from_date: str | None = None) -> dict[str, list[dict[str, Any]]]:
+        pipeline: list[dict[str, Any]] = []
+        if from_date is not None:
+            pipeline.append({"$match": {"jerusalem_date": {"$gte": from_date}}})
 
-    def get_unmapped_area_rows(self) -> list[dict[str, Any]]:
-        return list(
-            self._alerts.aggregate(
-                [
-                    {"$unwind": "$areas"},
-                    {
-                        "$lookup": {
-                            "from": self._settings.cities_collection,
-                            "localField": "areas",
-                            "foreignField": "value",
-                            "as": "city",
-                        }
-                    },
-                    {"$set": {"city": {"$first": "$city"}}},
-                    {"$match": {"city": None}},
-                    {"$group": {"_id": "$areas", "count": {"$sum": 1}}},
-                    {"$sort": {"count": -1, "_id": 1}},
-                ]
-            )
+        pipeline.extend(
+            [
+                {"$unwind": "$areas"},
+                {
+                    "$lookup": {
+                        "from": self._settings.cities_collection,
+                        "localField": "areas",
+                        "foreignField": "value",
+                        "as": "city",
+                    }
+                },
+                {"$set": {"city": {"$first": "$city"}}},
+                {
+                    "$facet": {
+                        "mapped_city_rows": [
+                            {"$match": {"city": {"$ne": None}}},
+                            {
+                                "$group": {
+                                    "_id": "$city._id",
+                                    "name": {"$first": {"$ifNull": ["$city.names.en", "$city.names.he", "$areas"]}},
+                                    "name_he": {"$first": {"$ifNull": ["$city.names.he", "$areas"]}},
+                                    "name_en": {"$first": {"$ifNull": ["$city.names.en", "$city.names.he", "$areas"]}},
+                                    "lat": {"$first": "$city.lat"},
+                                    "lng": {"$first": "$city.lng"},
+                                    "total_alerts": {"$sum": 1},
+                                    "last_alert_timestamp": {"$max": "$timestamp"},
+                                }
+                            },
+                            {"$match": {"total_alerts": {"$gte": min_alerts}}},
+                            {"$sort": {"total_alerts": -1, "name": 1}},
+                        ],
+                        "unmapped_rows": [
+                            {"$match": {"city": None}},
+                            {"$group": {"_id": "$areas", "count": {"$sum": 1}}},
+                            {"$sort": {"count": -1, "_id": 1}},
+                        ],
+                    }
+                },
+            ]
         )
+
+        rows = list(
+            self._alerts.aggregate(pipeline)
+        )
+        if not rows:
+            return {"mapped_city_rows": [], "unmapped_rows": []}
+        return rows[0]
