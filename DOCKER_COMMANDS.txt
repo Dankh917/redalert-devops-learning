@@ -1,0 +1,51 @@
+Docker Commands Notes
+=====================
+
+This file is a running notes sheet for Docker commands learned in this repo.
+We can keep appending to it and later convert it to PDF.
+
+Compose Notes
+-------------
+
+A Compose file answers three questions:
+1. What containers/services do I want?
+2. How should they connect?
+3. What persistent storage do they need?
+
+1. Verify Docker works
+docker --version
+docker compose version
+docker run hello-world
+
+2. Build the backend image
+cd C:\Users\Dan\Desktop\Projects\redalert-devops-learning
+docker build -t redalert-backend ./backend
+
+3. Run the backend container
+docker run -p 8000:8000 redalert-backend
+
+4. Run MongoDB in a container
+docker run -d --name redalert-mongo -p 27017:27017 mongo:7
+
+5. List running containers
+docker ps -a | *-a for all containers not only running
+
+6. Stop and remove a container
+docker stop redalert-mongo
+docker rm redalert-mongo
+
+7. Run MongoDB with a persistent volume
+docker run -d --name redalert-mongo -p 27017:27017 -v mongo_data:/data/db mongo:7
+
+8. List Docker volumes
+docker volume ls
+
+9. Run backend with Mongo connection env var
+docker run -p 8000:8000 -e MONGO_URI=mongodb://host.docker.internal:27017 redalert-backend
+
+10. Show all containers, including stopped ones
+docker ps -a
+
+11. Check which process is using a port on Windows
+netstat -ano | findstr :27017
+tasklist /FI "PID eq <PID>"
