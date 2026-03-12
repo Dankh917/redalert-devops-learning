@@ -1,6 +1,6 @@
 # RedAlert DevOps Learning Project
 
-Hands-on RedAlert learning project focused on backend development, Docker, and the next phase of CI/CD automation.
+Hands-on RedAlert learning project focused on backend development, Docker, testing, and CI/CD automation.
 
 ## Current Status
 
@@ -9,8 +9,16 @@ The app is now containerized with Docker Compose:
 - `mongo` service for MongoDB with a persistent named volume
 - `backend` service for the FastAPI API
 - `frontend` service for the static UI served by Nginx
+- first backend tests added with `pytest`
+- first GitHub Actions CI workflow added for push-based backend test runs
 
-The current next learning target is CI: automatic checks when code is pushed.
+Current learning progress:
+
+- Dockerized full app stack with Compose
+- persistent MongoDB storage with a named volume
+- frontend-to-backend container communication through Nginx proxying
+- initial backend automated tests
+- initial GitHub Actions CI workflow
 
 ## Tech Stack
 
@@ -23,6 +31,8 @@ The current next learning target is CI: automatic checks when code is pushed.
 - Nginx
 - Docker
 - Docker Compose
+- Pytest
+- GitHub Actions
 
 ## Run With Docker Compose
 
@@ -101,6 +111,35 @@ python -m http.server 4173
 
 Then open `http://127.0.0.1:4173`.
 
+## Testing
+
+Install backend dev dependencies:
+
+```bash
+python -m pip install -r backend/requirements-dev.txt
+```
+
+Run backend tests:
+
+```bash
+python -m pytest backend/tests -q
+```
+
+Current test coverage includes:
+
+- alert document generation
+- polygon geometry generation
+
+## CI
+
+The repo now includes a first GitHub Actions workflow:
+
+- workflow file: `.github/workflows/ci.yml`
+- trigger: every `push`
+- current job: install backend dev dependencies and run backend tests
+
+This is the first CI step before adding image builds, stronger branch protection, and deployment workflows.
+
 ## API Endpoints
 
 - `GET /api/alerts/today` returns how many alert records happened today in `Asia/Jerusalem` time.
@@ -125,3 +164,4 @@ It includes:
 - When the latest stored alert is less than 60 seconds old, each API request first attempts a guarded refresh.
 - That refresh is throttled with a short cooldown so bursts of traffic do not trigger repeated upstream syncs.
 - Compose service names are used for internal container-to-container communication, for example `mongodb://mongo:27017` and backend proxying from the frontend container.
+- Local development and containerized development are both supported, depending on what is being learned or changed.
