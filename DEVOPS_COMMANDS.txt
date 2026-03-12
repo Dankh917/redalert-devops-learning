@@ -1,7 +1,7 @@
-Docker Commands Notes
+DevOps Commands Notes
 =====================
 
-This file is a running notes sheet for Docker commands learned in this repo.
+This file is a running notes sheet for Docker, Git, testing, and CI commands learned in this repo.
 We can keep appending to it and later convert it to PDF.
 
 Compose Notes
@@ -49,3 +49,21 @@ docker ps -a
 11. Check which process is using a port on Windows
 netstat -ano | findstr :27017
 tasklist /FI "PID eq <PID>"
+
+17. Install backend test dependencies
+python -m pip install -r backend\requirements-dev.txt
+
+18. Run backend tests locally
+python -m pytest backend\tests -q
+
+19. Check git working tree state
+git status
+
+20. Stage specific files for commit
+git add .github/workflows/ci.yml backend/requirements-dev.txt backend/tests/conftest.py backend/tests/test_document_builders.py README.md
+
+21. Create a commit
+git commit -m "Add backend tests and CI workflow"
+
+22. Push commits to GitHub
+git push
