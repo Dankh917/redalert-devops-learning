@@ -50,13 +50,12 @@ class AlertService:
     def _maybe_refresh_recent_alerts(self) -> None:
         latest_alert = self._alerts_repository.get_latest_alert()
         latest_timestamp = int(latest_alert["timestamp"]) if latest_alert and latest_alert.get("timestamp") else 0
-        if not latest_timestamp:
-            return
 
         now = datetime.now(UTC)
-        latest_alert_at = datetime.fromtimestamp(latest_timestamp, tz=UTC)
-        if (now - latest_alert_at).total_seconds() > self.RECENT_ALERT_WINDOW_SECONDS:
-            return
+        if latest_timestamp:
+            latest_alert_at = datetime.fromtimestamp(latest_timestamp, tz=UTC)
+            if (now - latest_alert_at).total_seconds() <= self.RECENT_ALERT_WINDOW_SECONDS:
+                return
 
         if not self._auto_refresh_lock.acquire(blocking=False):
             return
