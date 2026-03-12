@@ -15,6 +15,14 @@ services:
     depends_on:
       - mongo
 
+  frontend:
+    build: ./frontend
+    container_name: redalert-frontend
+    ports:
+      - "4173:80"
+    depends_on:
+      - backend
+
 volumes:
   mongo-data:
     

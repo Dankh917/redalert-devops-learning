@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = window.location.origin;
 const ROARING_LION_FROM_DATE = "2026-02-28";
 const MODE_STORAGE_KEY = "redalert-dashboard-mode";
 const ISRAEL_VIEW = {
