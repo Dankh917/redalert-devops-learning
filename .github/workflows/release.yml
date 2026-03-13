@@ -1,0 +1,25 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*" #check for tags starting with "v"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build backend release image
+        run: docker build -t redalert-backend:${{ github.ref_name }} ./backend
+
+      - name: Build frontend release image
+        run: docker build -t redalert-frontend:${{ github.ref_name }} ./frontend
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
