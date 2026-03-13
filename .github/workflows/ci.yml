@@ -38,6 +38,5 @@ jobs:
       - name: Build frontend image
         run: docker build -t redalert-frontend ./frontend
     
-      - name: Test runner
-        run: echo "runner works"
+    
 
