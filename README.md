@@ -10,7 +10,9 @@ The app is now containerized with Docker Compose:
 - `backend` service for the FastAPI API
 - `frontend` service for the static UI served by Nginx
 - first backend tests added with `pytest`
-- first GitHub Actions CI workflow added for push-based backend test runs
+- GitHub Actions CI workflow for pushes and pull requests
+- Compose-based smoke test in CI for the full stack
+- tag-based release workflow with GitHub Releases
 
 Current learning progress:
 
@@ -18,7 +20,9 @@ Current learning progress:
 - persistent MongoDB storage with a named volume
 - frontend-to-backend container communication through Nginx proxying
 - initial backend automated tests
-- initial GitHub Actions CI workflow
+- CI on `push` and `pull_request`
+- Compose smoke test that starts the full stack in GitHub Actions
+- release workflow triggered by version tags like `v0.1.0`
 
 ## Tech Stack
 
@@ -132,13 +136,31 @@ Current test coverage includes:
 
 ## CI
 
-The repo now includes a first GitHub Actions workflow:
+The repo now includes a GitHub Actions CI workflow:
 
 - workflow file: `.github/workflows/ci.yml`
-- trigger: every `push`
-- current job: install backend dev dependencies and run backend tests
+- triggers:
+  - every `push`
+  - every `pull_request`
+- current jobs:
+  - `backend-tests`: install backend dev dependencies and run backend tests
+  - `compose-smoke`: start the full stack with `docker compose`, bootstrap Mongo data, and call a backend API endpoint
 
-This is the first CI step before adding image builds, stronger branch protection, and deployment workflows.
+This means CI now checks both code correctness and whether the containerized app can actually start and respond inside GitHub Actions.
+
+## Releases
+
+The repo also includes a release workflow:
+
+- workflow file: `.github/workflows/release.yml`
+- trigger: every pushed Git tag matching `v*`, for example `v0.1.0`
+- current job:
+  - start the full stack with Docker Compose
+  - bootstrap Mongo data
+  - verify the backend API responds
+  - create a GitHub Release entry for the tag
+
+This makes version tags part of the learning flow, connecting Git versioning with automated release validation.
 
 ## API Endpoints
 
