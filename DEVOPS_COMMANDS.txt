@@ -56,14 +56,14 @@ python -m pip install -r backend\requirements-dev.txt
 18. Run backend tests locally
 python -m pytest backend\tests -q
 
-19. Check git working tree state
-git status
+19. Update CI workflow to run on pull requests too
+Edit .github/workflows/ci.yml and change:
+on:
+  push:
+to:
+on:
+  push:
+  pull_request:
 
-20. Stage specific files for commit
-git add .github/workflows/ci.yml backend/requirements-dev.txt backend/tests/conftest.py backend/tests/test_document_builders.py README.md
-
-21. Create a commit
-git commit -m "Add backend tests and CI workflow"
-
-22. Push commits to GitHub
-git push
+20. Example version tag format for a release
+v0.1.0
