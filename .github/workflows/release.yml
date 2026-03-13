@@ -5,6 +5,10 @@ on:
     tags:
       - "v*" #check for tags starting with "v"
 
+permissions:
+  contents: write
+
+
 jobs:
   release:
     runs-on: ubuntu-latest
