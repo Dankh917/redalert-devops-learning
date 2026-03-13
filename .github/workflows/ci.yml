@@ -25,18 +25,27 @@ jobs:
       - name: Run tests
         run: python -m pytest backend/tests -q
 
-  docker-builds:
+  compose-smoke:
     runs-on: ubuntu-latest
     steps:
-    
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Build backend image  
-        run: docker build -t redalert-backend ./backend
+      - name: build and start services using docker compose  
+        run: docker compose up -d --build
       
-      - name: Build frontend image
-        run: docker build -t redalert-frontend ./frontend
+      - name: Wait for services
+        run: sleep 10
+
+      - name: Bootstrap database
+        run: docker compose exec -T backend python -m scripts.sync_mongo_data --drop-existing
+
+      - name: Check backend API
+        run: curl --fail http://127.0.0.1:8000/api/alerts/today
+
+
+      
+
     
     
 

@@ -17,11 +17,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build backend release image
-        run: docker build -t redalert-backend:${{ github.ref_name }} ./backend
+      - name: Build and start services using docker compose
+        run: docker compose up -d --build
 
-      - name: Build frontend release image
-        run: docker build -t redalert-frontend:${{ github.ref_name }} ./frontend
+      - name: Wait for services
+        run: sleep 10
+
+      - name: Bootstrap database
+        run: docker compose exec -T backend python -m scripts.sync_mongo_data --drop-existing
+
+      - name: Check backend API
+        run: curl --fail http://127.0.0.1:8000/api/alerts/today
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
