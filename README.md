@@ -23,6 +23,7 @@ Current learning progress:
 - CI on `push` and `pull_request`
 - Compose smoke test that starts the full stack in GitHub Actions
 - release workflow triggered by version tags like `v0.1.0`
+- branch protection on `main` requiring a pull request plus passing `backend-tests` and `compose-smoke`
 
 ## Tech Stack
 
