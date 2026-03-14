@@ -23,6 +23,7 @@ Current learning progress:
 - CI on `push` and `pull_request`
 - Compose smoke test that starts the full stack in GitHub Actions
 - release workflow triggered by version tags like `v0.1.0`
+- branch protection on `main` requiring a pull request plus passing `backend-tests` and `compose-smoke`
 
 ## Tech Stack
 
@@ -188,4 +189,3 @@ It includes:
 - Compose service names are used for internal container-to-container communication, for example `mongodb://mongo:27017` and backend proxying from the frontend container.
 - Local development and containerized development are both supported, depending on what is being learned or changed.
 
--this is a test for the brach and the new ruleset
