@@ -24,6 +24,7 @@ Current learning progress:
 - Compose smoke test that starts the full stack in GitHub Actions
 - release workflow triggered by version tags like `v0.1.0`
 - branch protection on `main` requiring a pull request plus passing `backend-tests` and `compose-smoke`
+- release workflow prepared to publish versioned backend and frontend images to GitHub Container Registry (`ghcr.io`)
 
 ## Tech Stack
 
@@ -159,6 +160,7 @@ The repo also includes a release workflow:
   - start the full stack with Docker Compose
   - bootstrap Mongo data
   - verify the backend API responds
+  - log in to GitHub Container Registry and push versioned backend/frontend images
   - create a GitHub Release entry for the tag
 
 This makes version tags part of the learning flow, connecting Git versioning with automated release validation.
