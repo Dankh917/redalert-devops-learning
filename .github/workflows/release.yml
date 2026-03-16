@@ -18,6 +18,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set image owner
+        id: image_owner
+        run: echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
       - name: Build and start services using docker compose
         run: docker compose up -d --build
 
@@ -29,6 +33,27 @@ jobs:
 
       - name: Check backend API
         run: curl --fail http://127.0.0.1:8000/api/alerts/today
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: ghcr.io/${{ steps.image_owner.outputs.owner }}/redalert-backend:${{ github.ref_name }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: ghcr.io/${{ steps.image_owner.outputs.owner }}/redalert-frontend:${{ github.ref_name }}
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
