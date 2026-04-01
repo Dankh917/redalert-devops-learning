@@ -164,6 +164,7 @@ The repo also includes a release workflow:
   - verify the backend API responds
   - log in to GitHub Container Registry and push versioned backend/frontend images
   - create a GitHub Release entry for the tag
+  - deploy the released version onto the Ubuntu VM using the VM deployment Compose file
 
 This makes version tags part of the learning flow, connecting Git versioning with automated release validation.
 
