@@ -1,0 +1,27 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: redalert-mongo
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    image: ghcr.io/dankh917/redalert-backend:${APP_VERSION}
+    container_name: redalert-backend
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+    depends_on:
+      - mongo
+
+  frontend:
+    image: ghcr.io/dankh917/redalert-frontend:${APP_VERSION}
+    container_name: redalert-frontend
+    ports:
+      - "4173:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
