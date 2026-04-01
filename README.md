@@ -26,6 +26,7 @@ Current learning progress:
 - branch protection on `main` requiring a pull request plus passing `backend-tests` and `compose-smoke`
 - release workflow prepared to publish versioned backend and frontend images to GitHub Container Registry (`ghcr.io`)
 - manual deployment verified on an Ubuntu Server VM using Docker, Compose, GHCR image pulls, SSH, and bridged VirtualBox networking
+- deployment automation in progress for promoting released container images onto the Ubuntu VM
 
 ## Tech Stack
 
@@ -198,6 +199,18 @@ docker compose exec backend python -m scripts.sync_mongo_data --drop-existing
 curl http://127.0.0.1:8000/api/alerts/today
 curl -I http://127.0.0.1:4173
 ```
+
+## Deployment Direction
+
+The next CD step is deployment automation from released container images onto the Ubuntu VM.
+
+Planned shape:
+
+- keep CI and release validation in GitHub Actions
+- publish versioned backend and frontend images to GitHub Container Registry
+- deploy trusted release tags onto the Ubuntu VM with a deployment-specific Docker Compose file
+- continue toward a fuller CI/CD pipeline with environment separation and production-style deployment flow
+
 
 ## API Endpoints
 
