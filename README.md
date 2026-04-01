@@ -25,6 +25,7 @@ Current learning progress:
 - release workflow triggered by version tags like `v0.1.0`
 - branch protection on `main` requiring a pull request plus passing `backend-tests` and `compose-smoke`
 - release workflow prepared to publish versioned backend and frontend images to GitHub Container Registry (`ghcr.io`)
+- manual deployment verified on an Ubuntu Server VM using Docker, Compose, GHCR image pulls, SSH, and bridged VirtualBox networking
 
 ## Tech Stack
 
@@ -164,6 +165,39 @@ The repo also includes a release workflow:
   - create a GitHub Release entry for the tag
 
 This makes version tags part of the learning flow, connecting Git versioning with automated release validation.
+
+## Manual VM Deployment
+
+A first deployment was manually verified on an Ubuntu Server VM running locally in VirtualBox.
+
+High-level flow:
+
+- install Docker and Docker Compose on the Ubuntu VM
+- log in to GitHub Container Registry from the VM
+- create a deployment `docker-compose.yml` that uses released images from `ghcr.io`
+- pull the images and start the stack with `docker compose up -d`
+- bootstrap Mongo data from the backend container
+- verify backend and frontend responses from the VM
+- switch VirtualBox networking from NAT to bridged mode so the VM receives its own LAN IP
+- access the deployed frontend from the Windows host through the VM IP
+
+This created the first real deployment target before moving on to deployment automation.
+
+Useful commands used during the first deployment:
+
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose-v2
+sudo usermod -aG docker $USER
+docker login ghcr.io -u <github-username>
+mkdir -p ~/redalert-deploy
+cd ~/redalert-deploy
+docker compose pull
+docker compose up -d
+docker compose exec backend python -m scripts.sync_mongo_data --drop-existing
+curl http://127.0.0.1:8000/api/alerts/today
+curl -I http://127.0.0.1:4173
+```
 
 ## API Endpoints
 
