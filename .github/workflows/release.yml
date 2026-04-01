@@ -3,18 +3,16 @@ name: Release
 on:
   push:
     tags:
-      - "v*" #check for tags starting with "v"
+      - "v*"
 
 permissions:
   contents: write
   packages: write
 
-
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -59,3 +57,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+
+  deploy:
+    needs: release
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set app version
+        run: echo "APP_VERSION=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p ~/redalert-deploy
+          cp deploy/docker-compose.vm.yml ~/redalert-deploy/docker-compose.yml
+
+      - name: Deploy application
+        run: |
+          cd ~/redalert-deploy
+          docker compose pull
+          docker compose up -d
+          docker compose exec -T backend python -m scripts.sync_mongo_data --drop-existing
+          curl --fail http://127.0.0.1:8000/api/alerts/today
