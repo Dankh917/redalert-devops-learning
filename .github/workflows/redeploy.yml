@@ -1,0 +1,31 @@
+name: Redeploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_version:
+        description: Version tag to redeploy, for example v0.2.0
+        required: true
+
+jobs:
+  redeploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set app version
+        run: echo "APP_VERSION=${{ github.event.inputs.app_version }}" >> $GITHUB_ENV
+
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p ~/redalert-deploy
+          cp deploy/docker-compose.vm.yml ~/redalert-deploy/docker-compose.yml
+
+      - name: Redeploy application
+        run: |
+          cd ~/redalert-deploy
+          docker compose pull
+          docker compose up -d
+          docker compose exec -T backend python -m scripts.sync_mongo_data --drop-existing
+          curl --fail http://127.0.0.1:8000/api/alerts/today

@@ -26,7 +26,8 @@ Current learning progress:
 - branch protection on `main` requiring a pull request plus passing `backend-tests` and `compose-smoke`
 - release workflow prepared to publish versioned backend and frontend images to GitHub Container Registry (`ghcr.io`)
 - manual deployment verified on an Ubuntu Server VM using Docker, Compose, GHCR image pulls, SSH, and bridged VirtualBox networking
-- deployment automation in progress for promoting released container images onto the Ubuntu VM
+- automatic deployment enabled for trusted release tags, promoting released container images onto the Ubuntu VM
+- manual redeploy workflow added for rollback to any previously published release tag
 
 ## Tech Stack
 
@@ -170,7 +171,7 @@ This makes version tags part of the learning flow, connecting Git versioning wit
 
 ## Manual VM Deployment
 
-A first deployment was manually verified on an Ubuntu Server VM running locally in VirtualBox.
+A deployment target was set up on an Ubuntu Server VM running locally in VirtualBox.
 
 High-level flow:
 
@@ -183,7 +184,7 @@ High-level flow:
 - switch VirtualBox networking from NAT to bridged mode so the VM receives its own LAN IP
 - access the deployed frontend from the Windows host through the VM IP
 
-This created the first real deployment target before moving on to deployment automation.
+The VM now acts as the deployment target for the project and is reachable on the local network like a separate Linux server.
 
 Useful commands used during the first deployment:
 
@@ -198,19 +199,20 @@ docker compose pull
 docker compose up -d
 docker compose exec backend python -m scripts.sync_mongo_data --drop-existing
 curl http://127.0.0.1:8000/api/alerts/today
-curl -I http://127.0.0.1:4173
+curl -I http://<vm-lan-ip>:4173
 ```
 
-## Deployment Direction
+## CD
 
-The next CD step is deployment automation from released container images onto the Ubuntu VM.
+The project now includes a first CD path:
 
-Planned shape:
+- trusted release tags trigger the release workflow
+- the release workflow builds and publishes versioned backend/frontend images to GitHub Container Registry
+- after the release job succeeds, the same workflow deploys that released version onto the Ubuntu VM
+- the VM deployment uses a deployment-specific Docker Compose file that pulls the tagged images from `ghcr.io`
+- a separate manual redeploy workflow can redeploy an older published tag as a rollback path
 
-- keep CI and release validation in GitHub Actions
-- publish versioned backend and frontend images to GitHub Container Registry
-- deploy trusted release tags onto the Ubuntu VM with a deployment-specific Docker Compose file
-- continue toward a fuller CI/CD pipeline with environment separation and production-style deployment flow
+This gives the project an end-to-end flow from code changes to validated release artifacts to deployed application updates on the Linux VM.
 
 
 ## API Endpoints
