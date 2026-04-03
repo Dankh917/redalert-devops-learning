@@ -1,0 +1,28 @@
+name: Observability
+
+on:
+  workflow_dispatch:
+
+jobs:
+  observability:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Prepare observability directory
+        run: |
+          mkdir -p ~/redalert-observability
+          cp observability/docker-compose.yml ~/redalert-observability/docker-compose.yml
+          cp observability/loki-config.yml ~/redalert-observability/loki-config.yml
+          cp observability/promtail-config.yml ~/redalert-observability/promtail-config.yml
+
+      - name: Start observability stack
+        run: |
+          cd ~/redalert-observability
+          docker compose up -d
+
+      - name: Check observability containers
+        run: |
+          cd ~/redalert-observability
+          docker compose ps

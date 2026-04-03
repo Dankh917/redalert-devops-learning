@@ -29,3 +29,5 @@ jobs:
           docker compose up -d
           docker compose exec -T backend python -m scripts.sync_mongo_data --drop-existing
           curl --fail http://127.0.0.1:8000/api/alerts/today
+
+
